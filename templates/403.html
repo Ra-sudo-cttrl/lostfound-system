@@ -1,0 +1,27 @@
+ {% extends "base.html" %}
+
+{% block title %}Akses Ditolak - Lost & Found System{% endblock %}
+
+{% block content %}
+<div class="text-center py-5 my-5 fade-in">
+    <div class="mb-4">
+        <i class="fas fa-ban fa-5x text-danger"></i>
+    </div>
+    <h1 class="display-4 mb-3">403</h1>
+    <h2 class="mb-4">Akses Ditolak</h2>
+    <p class="lead mb-4">
+        Anda tidak memiliki izin untuk mengakses halaman ini.
+        Hanya administrator yang dapat mengakses fitur ini.
+    </p>
+    <div class="d-flex justify-content-center gap-3">
+        <a href="{{ url_for('index') }}" class="btn btn-primary">
+            <i class="fas fa-home me-2"></i> Kembali ke Beranda
+        </a>
+        {% if not session.get('user_id') %}
+            <a href="{{ url_for('login') }}" class="btn btn-success">
+                <i class="fas fa-sign-in-alt me-2"></i> Login sebagai Admin
+            </a>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

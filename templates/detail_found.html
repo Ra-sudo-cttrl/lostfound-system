@@ -1,0 +1,188 @@
+ {% extends "base.html" %}
+
+{% block title %}Detail Barang Ditemukan - Lost & Found System{% endblock %}
+
+{% block content %}
+<div class="fade-in">
+    <!-- Back Button -->
+    <div class="mb-4">
+        <a href="{{ url_for('list_items', type='found') }}" class="btn btn-outline-secondary">
+            <i class="fas fa-arrow-left me-2"></i> Kembali ke Daftar
+        </a>
+    </div>
+    
+    <div class="detail-card">
+        <div class="row g-0">
+            <!-- Image Column -->
+            <div class="col-md-5">
+                {% if item.image %}
+                    <img src="{{ url_for('static', filename='uploads/' + item.image) }}" 
+                         class="detail-image" alt="{{ item.name }}">
+                {% else %}
+                    <div class="detail-image bg-light d-flex align-items-center justify-content-center">
+                        <i class="fas fa-image fa-5x text-secondary"></i>
+                    </div>
+                {% endif %}
+                
+                <!-- WhatsApp Button -->
+                <div class="p-4 text-center">
+                    <a href="https://wa.me/{{ item.contact }}?text=Halo,%20saya%20pemilik%20barang%20yang%20Anda%20temukan%20di%20Lost%20%26%20Found%20System:%0A%0A*{{ item.name|urlencode }}*%0A{{ item.description[:100]|urlencode }}%0A%0AMohon%20konfirmasi%20untuk%20pengambilan." 
+                       target="_blank" class="btn btn-whatsapp btn-lg w-100">
+                        <i class="fab fa-whatsapp me-2"></i> Hubungi via WhatsApp
+                    </a>
+                    <small class="text-muted mt-2 d-block">
+                        Klik untuk menghubungi penemu via WhatsApp
+                    </small>
+                </div>
+            </div>
+            
+            <!-- Details Column -->
+            <div class="col-md-7">
+                <div class="p-4">
+                    <!-- Header with Badge -->
+                    <div class="d-flex justify-content-between align-items-start mb-4">
+                        <div>
+                            <span class="badge bg-success fs-6 mb-2">
+                                <i class="fas fa-check-circle me-1"></i> BARANG DITEMUKAN
+                            </span>
+                            <h1 class="h2 mb-3">{{ item.name }}</h1>
+                        </div>
+                        
+                        {% if session.get('is_admin') %}
+                            <div class="btn-group">
+                                <a href="{{ url_for('edit_item', item_id=item.id) }}" 
+                                   class="btn btn-outline-warning btn-sm">
+                                    <i class="fas fa-edit"></i>
+                                </a>
+                                <form method="POST" action="{{ url_for('delete_item', item_id=item.id) }}" 
+                                      class="d-inline" onsubmit="return confirm('Yakin ingin menghapus?');">
+                                    <button type="submit" class="btn btn-outline-danger btn-sm ms-1">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </form>
+                            </div>
+                        {% endif %}
+                    </div>
+                    
+                    <!-- Description -->
+                    <div class="info-item">
+                        <h5 class="info-label">Deskripsi</h5>
+                        <p class="mb-0">{{ item.description }}</p>
+                    </div>
+                    
+                    <!-- Location -->
+                    <div class="info-item">
+                        <h5 class="info-label">
+                            <i class="fas fa-map-marker-alt me-2"></i> Lokasi Ditemukan
+                        </h5>
+                        <p class="mb-0">{{ item.location }}</p>
+                    </div>
+                    
+                    <!-- Contact Info -->
+                    <div class="info-item">
+                        <h5 class="info-label">
+                            <i class="fas fa-phone-alt me-2"></i> Kontak Penemu
+                        </h5>
+                        <p class="mb-0">
+                            <a href="tel:{{ item.contact }}" class="text-decoration-none">
+                                {{ item.contact }}
+                            </a>
+                        </p>
+                    </div>
+                    
+                    <!-- Date Reported -->
+                    <div class="info-item">
+                        <h5 class="info-label">
+                            <i class="fas fa-calendar-alt me-2"></i> Tanggal Dilaporkan
+                        </h5>
+                        <p class="mb-0">{{ item.timestamp.strftime('%A, %d %B %Y - %H:%M') }}</p>
+                    </div>
+                    
+                    <!-- Status -->
+                    <div class="info-item">
+                        <h5 class="info-label">
+                            <i class="fas fa-info-circle me-2"></i> Status
+                        </h5>
+                        <p class="mb-0">
+                            <span class="badge bg-success">
+                                <i class="fas fa-check me-1"></i> Menunggu Pengambilan
+                            </span>
+                        </p>
+                        <small class="text-muted">
+                            Barang ini telah ditemukan dan menunggu pengambilan oleh pemilik.
+                        </small>
+                    </div>
+                    
+                    <!-- Claim Instructions -->
+                    <div class="alert alert-info mt-3">
+                        <h6 class="alert-heading">
+                            <i class="fas fa-info-circle me-2"></i> Cara Mengambil Barang:
+                        </h6>
+                        <ol class="mb-0 mt-2">
+                            <li>Hubungi penemu via tombol WhatsApp di samping</li>
+                            <li>Siapkan bukti kepemilikan barang</li>
+                            <li>Atur janji temu di lokasi yang disepakati</li>
+                            <li>Konfirmasi pengambilan di sistem</li>
+                        </ol>
+                    </div>
+                    
+                    <!-- Action Buttons -->
+                    <div class="mt-4 pt-4 border-top">
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <a href="{{ url_for('list_items', type='lost') }}" 
+                                   class="btn btn-outline-primary w-100">
+                                    <i class="fas fa-search me-2"></i> Cek Barang Hilang
+                                </a>
+                            </div>
+                            <div class="col-md-6">
+                                <a href="{{ url_for('add_item') }}" 
+                                   class="btn btn-success w-100">
+                                    <i class="fas fa-plus-circle me-2"></i> Laporkan Barang Lain
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Similar Items -->
+    {% if similar_items %}
+    <div class="mt-5">
+        <h4 class="section-title mb-4">
+            <i class="fas fa-random me-2"></i> Barang Ditemukan Lainnya
+        </h4>
+        <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+            {% for similar in similar_items %}
+                {% if similar.id != item.id %}
+                <div class="col">
+                    <div class="card h-100">
+                        {% if similar.image %}
+                            <img src="{{ url_for('static', filename='uploads/' + similar.image) }}" 
+                                 class="card-img-top" alt="{{ similar.name }}">
+                        {% endif %}
+                        <div class="card-body">
+                            <h5 class="card-title">{{ similar.name }}</h5>
+                            <p class="card-text text-truncate">{{ similar.description }}</p>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <small class="text-muted">{{ similar.location }}</small>
+                                <span class="badge bg-success">Ditemukan</span>
+                            </div>
+                        </div>
+                        <div class="card-footer bg-transparent">
+                            <a href="{{ url_for('item_detail', item_id=similar.id) }}" 
+                               class="btn btn-outline-success btn-sm w-100">
+                                Lihat Detail
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

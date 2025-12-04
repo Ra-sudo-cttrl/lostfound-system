@@ -1,0 +1,24 @@
+ {% extends "base.html" %}
+
+{% block title %}Halaman Tidak Ditemukan - Lost & Found System{% endblock %}
+
+{% block content %}
+<div class="text-center py-5 my-5 fade-in">
+    <div class="mb-4">
+        <i class="fas fa-exclamation-triangle fa-5x text-warning"></i>
+    </div>
+    <h1 class="display-4 mb-3">404</h1>
+    <h2 class="mb-4">Halaman Tidak Ditemukan</h2>
+    <p class="lead mb-4">
+        Maaf, halaman yang Anda cari tidak ditemukan atau telah dipindahkan.
+    </p>
+    <div class="d-flex justify-content-center gap-3">
+        <a href="{{ url_for('index') }}" class="btn btn-primary">
+            <i class="fas fa-home me-2"></i> Kembali ke Beranda
+        </a>
+        <a href="{{ url_for('list_items', type='lost') }}" class="btn btn-outline-primary">
+            <i class="fas fa-search me-2"></i> Cari Barang
+        </a>
+    </div>
+</div>
+{% endblock %}

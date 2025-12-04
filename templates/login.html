@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+
+{% block title %}Login - Lost & Found System{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-6 col-lg-5">
+        <div class="form-container fade-in">
+            <div class="text-center mb-4">
+                <h2 class="section-title">
+                    <i class="fas fa-sign-in-alt me-2"></i> Login
+                </h2>
+                <p class="text-muted">Masuk ke akun Anda untuk melaporkan barang</p>
+            </div>
+            
+            <form method="POST" action="{{ url_for('login') }}">
+                {{ form.hidden_tag() }}
+                
+                <div class="mb-3">
+                    <label for="username" class="form-label">
+                        <i class="fas fa-user me-1"></i> Username
+                    </label>
+                    {{ form.username(class="form-control", placeholder="Masukkan username") }}
+                    {% if form.username.errors %}
+                        <div class="text-danger small">
+                            {% for error in form.username.errors %}
+                                {{ error }}
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+                
+                <div class="mb-4">
+                    <label for="password" class="form-label">
+                        <i class="fas fa-lock me-1"></i> Password
+                    </label>
+                    {{ form.password(class="form-control", placeholder="Masukkan password") }}
+                    {% if form.password.errors %}
+                        <div class="text-danger small">
+                            {% for error in form.password.errors %}
+                                {{ error }}
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+                
+                <div class="d-grid gap-2">
+                    <button type="submit" class="btn btn-primary btn-lg">
+                        <i class="fas fa-sign-in-alt me-2"></i> Login
+                    </button>
+                </div>
+                
+                <div class="mt-3 text-center">
+                    <small class="text-muted">
+                        Hubungi admin kampus untuk mendapatkan akses akun
+                    </small>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

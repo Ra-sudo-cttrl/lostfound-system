@@ -1,0 +1,173 @@
+{% extends "base.html" %}
+
+{% block title %}Laporkan Barang - Lost & Found System{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <div class="form-container fade-in">
+            <div class="text-center mb-4">
+                <h2 class="section-title">
+                    <i class="fas fa-plus-circle me-2"></i> Laporkan Barang
+                </h2>
+                <p class="text-muted">Isi formulir berikut untuk melaporkan barang hilang atau ditemukan</p>
+            </div>
+            
+            <form method="POST" action="{{ url_for('add_item') }}" enctype="multipart/form-data">
+                {{ form.hidden_tag() }}
+                
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label for="type" class="form-label">
+                            <i class="fas fa-tag me-1"></i> Jenis Laporan
+                        </label>
+                        {{ form.type(class="form-select") }}
+                        {% if form.type.errors %}
+                            <div class="text-danger small">
+                                {% for error in form.type.errors %}
+                                    {{ error }}
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="col-md-6 mb-3">
+                        <label for="name" class="form-label">
+                            <i class="fas fa-box me-1"></i> Nama Barang
+                        </label>
+                        {{ form.name(class="form-control", placeholder="Contoh: Dompet, Kunci, HP, dll") }}
+                        {% if form.name.errors %}
+                            <div class="text-danger small">
+                                {% for error in form.name.errors %}
+                                    {{ error }}
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <div class="mb-3">
+                    <label for="description" class="form-label">
+                        <i class="fas fa-align-left me-1"></i> Deskripsi Detail
+                    </label>
+                    {{ form.description(class="form-control", rows="4", 
+                        placeholder="Deskripsikan barang dengan detail (warna, merek, ciri-ciri khusus, kondisi, dll)") }}
+                    {% if form.description.errors %}
+                        <div class="text-danger small">
+                            {% for error in form.description.errors %}
+                                {{ error }}
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+                
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label for="location" class="form-label">
+                            <i class="fas fa-map-marker-alt me-1"></i> Lokasi
+                        </label>
+                        {{ form.location(class="form-select", id="location-select") }}
+                        <div class="mt-2">
+                            <input type="text" class="form-control" id="location-custom" 
+                                   placeholder="Atau ketik lokasi lainnya..." style="display: none;">
+                        </div>
+                        {% if form.location.errors %}
+                            <div class="text-danger small">
+                                {% for error in form.location.errors %}
+                                    {{ error }}
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="col-md-6 mb-3">
+                        <label for="contact" class="form-label">
+                            <i class="fab fa-whatsapp me-1"></i> Nomor WhatsApp
+                        </label>
+                        {{ form.contact(class="form-control", placeholder="Contoh: 081234567890") }}
+                        {% if form.contact.errors %}
+                            <div class="text-danger small">
+                                {% for error in form.contact.errors %}
+                                    {{ error }}
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                        <small class="text-muted">Nomor untuk dihubungi via WhatsApp</small>
+                    </div>
+                </div>
+                
+                <div class="mb-4">
+                    <label for="image" class="form-label">
+                        <i class="fas fa-camera me-1"></i> Foto Barang
+                    </label>
+                    {{ form.image(class="form-control") }}
+                    {% if form.image.errors %}
+                        <div class="text-danger small">
+                            {% for error in form.image.errors %}
+                                {{ error }}
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                    <small class="text-muted">Format: JPG, JPEG, PNG (max 2MB)</small>
+                </div>
+                
+                <div class="d-grid gap-2">
+                    <button type="submit" class="btn btn-primary btn-lg">
+                        <i class="fas fa-paper-plane me-2"></i> Kirim Laporan
+                    </button>
+                    <a href="{{ url_for('index') }}" class="btn btn-outline-secondary">
+                        <i class="fas fa-arrow-left me-2"></i> Kembali ke Beranda
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const locationSelect = document.getElementById('location-select');
+    const locationCustom = document.getElementById('location-custom');
+    
+    // Tampilkan input teks jika "Lainnya" dipilih
+    locationSelect.addEventListener('change', function() {
+        if (this.value === 'lainnya') {
+            locationCustom.style.display = 'block';
+            locationCustom.required = true;
+            // Ubah value select menjadi kosong untuk memaksa input custom
+            this.value = '';
+        } else {
+            locationCustom.style.display = 'none';
+            locationCustom.required = false;
+            // Isi value custom dengan value dari select
+            locationCustom.value = '';
+        }
+    });
+    
+    // Jika form disubmit, set value location
+    document.querySelector('form').addEventListener('submit', function(e) {
+        if (locationCustom.style.display === 'block' && locationCustom.value.trim() !== '') {
+            // Jika input custom diisi, gunakan nilai dari input custom
+            // Kita perlu set value ke hidden field atau ubah select value
+            // Buat hidden input untuk menyimpan location
+            const hiddenInput = document.createElement('input');
+            hiddenInput.type = 'hidden';
+            hiddenInput.name = 'location';
+            hiddenInput.value = locationCustom.value;
+            this.appendChild(hiddenInput);
+            
+            // Nonaktifkan select asli
+            locationSelect.disabled = true;
+        }
+    });
+    
+    // Cek saat page load jika "lainnya" sudah dipilih sebelumnya
+    if (locationSelect.value === 'lainnya') {
+        locationCustom.style.display = 'block';
+        locationCustom.required = true;
+    }
+});
+</script>
+{% endblock %}

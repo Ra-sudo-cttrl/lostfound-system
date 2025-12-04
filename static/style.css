@@ -1,0 +1,403 @@
+ /* CSS Variables untuk tema kampus */
+:root {
+    --navy: #0A1A44;
+    --dark-gray: #1E1E1E;
+    --light-blue: #4AA3FF;
+    --light-gray: #f8f9fa;
+    --white: #ffffff;
+    --shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    --transition: all 0.3s ease;
+}
+
+/* Reset dan base styles */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: var(--light-gray);
+    color: var(--dark-gray);
+    line-height: 1.6;
+}
+
+/* Navbar Styles */
+.navbar-brand {
+    font-weight: 700;
+    font-size: 1.5rem;
+    color: var(--white) !important;
+}
+
+.navbar-brand .campus-logo {
+    height: 40px;
+    margin-right: 10px;
+}
+
+.navbar {
+    background: linear-gradient(135deg, var(--navy) 0%, #1a3a8f 100%);
+    box-shadow: var(--shadow);
+}
+
+.nav-link {
+    color: var(--white) !important;
+    font-weight: 500;
+    padding: 0.5rem 1rem !important;
+    border-radius: 4px;
+    transition: var(--transition);
+}
+
+.nav-link:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+    transform: translateY(-2px);
+}
+
+/* Hero Section */
+.hero {
+    background: linear-gradient(rgba(10, 26, 68, 0.9), rgba(10, 26, 68, 0.8)), 
+                url('https://images.unsplash.com/photo-1523050854058-8df90110c9f1?ixlib=rb-4.0.3&auto=format&fit=crop&w=1350&q=80');
+    background-size: cover;
+    background-position: center;
+    color: var(--white);
+    padding: 80px 0;
+    margin-bottom: 40px;
+}
+
+.hero h1 {
+    font-size: 3rem;
+    font-weight: 700;
+    margin-bottom: 1rem;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.hero p {
+    font-size: 1.2rem;
+    margin-bottom: 2rem;
+    opacity: 0.9;
+}
+
+/* Card Styles */
+.card {
+    border: none;
+    border-radius: 12px;
+    box-shadow: var(--shadow);
+    transition: var(--transition);
+    overflow: hidden;
+    height: 100%;
+}
+
+.card:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+}
+
+.card-img-top {
+    height: 200px;
+    object-fit: cover;
+    transition: var(--transition);
+}
+
+.card:hover .card-img-top {
+    transform: scale(1.05);
+}
+
+.card-title {
+    color: var(--navy);
+    font-weight: 600;
+    margin-bottom: 1rem;
+}
+
+.card-text {
+    color: #666;
+    margin-bottom: 1rem;
+}
+
+/* Badges */
+.badge-lost {
+    background-color: #dc3545;
+    color: white;
+}
+
+.badge-found {
+    background-color: #198754;
+    color: white;
+}
+
+/* Button Styles */
+.btn-primary {
+    background-color: var(--light-blue);
+    border-color: var(--light-blue);
+    padding: 0.5rem 2rem;
+    font-weight: 600;
+    border-radius: 6px;
+    transition: var(--transition);
+}
+
+.btn-primary:hover {
+    background-color: #2d8cff;
+    border-color: #2d8cff;
+    transform: translateY(-2px);
+}
+
+.btn-success {
+    background-color: #198754;
+    border-color: #198754;
+    padding: 0.5rem 2rem;
+    font-weight: 600;
+    border-radius: 6px;
+    transition: var(--transition);
+}
+
+.btn-success:hover {
+    background-color: #157347;
+    border-color: #157347;
+    transform: translateY(-2px);
+}
+
+.btn-whatsapp {
+    background-color: #25D366;
+    border-color: #25D366;
+    color: white;
+    font-weight: 600;
+    padding: 0.5rem 1.5rem;
+    border-radius: 6px;
+    transition: var(--transition);
+}
+
+.btn-whatsapp:hover {
+    background-color: #1da851;
+    border-color: #1da851;
+    transform: translateY(-2px);
+    color: white;
+}
+
+/* Form Styles */
+.form-container {
+    background: var(--white);
+    padding: 2.5rem;
+    border-radius: 12px;
+    box-shadow: var(--shadow);
+    margin: 2rem auto;
+    max-width: 800px;
+}
+
+.form-label {
+    font-weight: 600;
+    color: var(--navy);
+    margin-bottom: 0.5rem;
+}
+
+.form-control,
+.form-select {
+    border: 2px solid #e0e0e0;
+    border-radius: 6px;
+    padding: 0.75rem;
+    transition: var(--transition);
+}
+
+.form-control:focus,
+.form-select:focus {
+    border-color: var(--light-blue);
+    box-shadow: 0 0 0 0.25rem rgba(74, 163, 255, 0.25);
+}
+
+/* Search and Filter */
+.search-filter-container {
+    background: var(--white);
+    padding: 1.5rem;
+    border-radius: 12px;
+    box-shadow: var(--shadow);
+    margin-bottom: 2rem;
+}
+
+/* Detail Page */
+.detail-card {
+    background: var(--white);
+    border-radius: 12px;
+    box-shadow: var(--shadow);
+    overflow: hidden;
+}
+
+.detail-image {
+    width: 100%;
+    height: 400px;
+    object-fit: cover;
+}
+
+.info-item {
+    padding: 1rem 0;
+    border-bottom: 1px solid #eee;
+}
+
+.info-item:last-child {
+    border-bottom: none;
+}
+
+.info-label {
+    font-weight: 600;
+    color: var(--navy);
+    min-width: 120px;
+}
+
+/* Pagination */
+.pagination .page-link {
+    color: var(--navy);
+    border: 1px solid #dee2e6;
+    margin: 0 2px;
+    border-radius: 4px;
+}
+
+.pagination .page-link:hover {
+    background-color: var(--light-blue);
+    border-color: var(--light-blue);
+    color: white;
+}
+
+.pagination .page-item.active .page-link {
+    background-color: var(--navy);
+    border-color: var(--navy);
+}
+
+/* Flash Messages */
+.alert {
+    border-radius: 8px;
+    border: none;
+    box-shadow: var(--shadow);
+    margin-bottom: 1.5rem;
+}
+
+.alert-success {
+    background-color: #d1e7dd;
+    color: #0f5132;
+}
+
+.alert-danger {
+    background-color: #f8d7da;
+    color: #842029;
+}
+
+.alert-warning {
+    background-color: #fff3cd;
+    color: #664d03;
+}
+
+/* Footer */
+.footer {
+    background-color: var(--navy);
+    color: var(--white);
+    padding: 3rem 0;
+    margin-top: 4rem;
+}
+
+.footer h5 {
+    color: var(--light-blue);
+    margin-bottom: 1.5rem;
+}
+
+.footer a {
+    color: #ccc;
+    text-decoration: none;
+    transition: var(--transition);
+}
+
+.footer a:hover {
+    color: var(--light-blue);
+}
+
+/* Utility Classes */
+.section-title {
+    color: var(--navy);
+    font-weight: 700;
+    margin-bottom: 2rem;
+    position: relative;
+    padding-bottom: 0.5rem;
+}
+
+.section-title::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 60px;
+    height: 3px;
+    background-color: var(--light-blue);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .hero h1 {
+        font-size: 2rem;
+    }
+    
+    .hero p {
+        font-size: 1rem;
+    }
+    
+    .form-container {
+        padding: 1.5rem;
+    }
+    
+    .detail-image {
+        height: 300px;
+    }
+}
+
+/* Animation */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.fade-in {
+    animation: fadeIn 0.5s ease-out;
+}
+/* Tambahkan di akhir file style.css */
+
+/* Custom location input */
+.location-custom-container {
+    margin-top: 10px;
+    animation: fadeIn 0.3s ease-in;
+}
+
+/* Smooth transition for showing/hiding */
+#location-custom {
+    transition: all 0.3s ease;
+}
+
+/* Style untuk input yang aktif */
+#location-custom:focus {
+    border-color: var(--light-blue);
+    box-shadow: 0 0 0 0.25rem rgba(74, 163, 255, 0.25);
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .location-custom-container {
+        margin-top: 8px;
+    }
+}
+/* Tambahkan di file style.css */
+
+/* Logo di Navbar */
+.navbar-brand img {
+    height: 40px;
+    width: auto;
+    border-radius: 5px;
+    transition: transform 0.3s ease;
+}
+
+.navbar-brand img:hover {
+    transform: scale(1.05);
+}
+
+/* Hover effect untuk navbar */
+.navbar-brand:hover {
+    opacity: 0.9;
+}

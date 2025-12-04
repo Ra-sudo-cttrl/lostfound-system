@@ -1,0 +1,201 @@
+ {% extends "base.html" %}
+
+{% block title %}Beranda - Lost & Found System{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="hero text-center rounded">
+    <div class="container">
+        <h1 class="display-4 fw-bold">Lost & Found System</h1>
+        <p class="lead">Temukan barang hilang Anda atau bantu orang lain menemukan barang mereka di lingkungan kampus.</p>
+        
+        {% if not session.get('user_id') %}
+            <a href="{{ url_for('login') }}" class="btn btn-primary btn-lg me-2">
+                <i class="fas fa-sign-in-alt me-2"></i> Login untuk Melapor
+            </a>
+        {% else %}
+            <a href="{{ url_for('add_item') }}" class="btn btn-primary btn-lg me-2">
+                <i class="fas fa-plus-circle me-2"></i> Laporkan Barang
+            </a>
+        {% endif %}
+        
+        <a href="{{ url_for('list_items', type='lost') }}" class="btn btn-outline-light btn-lg">
+            <i class="fas fa-search me-2"></i> Cari Barang Hilang
+        </a>
+    </div>
+</section>
+
+<!-- Recent Items Section -->
+<div class="row mb-5">
+    <div class="col-md-6">
+        <h2 class="section-title">
+            <i class="fas fa-search me-2"></i> Barang Hilang Terbaru
+        </h2>
+        {% if lost_items %}
+            <div class="row">
+                {% for item in lost_items %}
+                <div class="col-md-6 mb-4 fade-in">
+                    <div class="card h-100">
+                        {% if item.image %}
+                            <img src="{{ url_for('static', filename='uploads/' + item.image) }}" 
+                                 class="card-img-top" alt="{{ item.name }}">
+                        {% else %}
+                            <img src="https://images.unsplash.com/photo-1580618672591-eb180b1a973f?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80" 
+                                 class="card-img-top" alt="No image">
+                        {% endif %}
+                        <div class="card-body">
+                            <h5 class="card-title">{{ item.name }}</h5>
+                            <p class="card-text text-truncate">{{ item.description }}</p>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <small class="text-muted">
+                                    <i class="fas fa-map-marker-alt me-1"></i>
+                                    {{ item.location }}
+                                </small>
+                                <span class="badge bg-danger">Hilang</span>
+                            </div>
+                        </div>
+                        <div class="card-footer bg-transparent">
+                            <a href="{{ url_for('item_detail', item_id=item.id) }}" 
+                               class="btn btn-outline-primary btn-sm w-100">
+                                <i class="fas fa-info-circle me-1"></i> Detail
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="alert alert-info">
+                <i class="fas fa-info-circle me-2"></i> Belum ada laporan barang hilang.
+            </div>
+        {% endif %}
+        
+        <div class="text-center mt-3">
+            <a href="{{ url_for('list_items', type='lost') }}" class="btn btn-primary">
+                Lihat Semua Barang Hilang <i class="fas fa-arrow-right ms-2"></i>
+            </a>
+        </div>
+    </div>
+    
+    <div class="col-md-6">
+        <h2 class="section-title">
+            <i class="fas fa-hand-holding-heart me-2"></i> Barang Ditemukan Terbaru
+        </h2>
+        {% if found_items %}
+            <div class="row">
+                {% for item in found_items %}
+                <div class="col-md-6 mb-4 fade-in">
+                    <div class="card h-100">
+                        {% if item.image %}
+                            <img src="{{ url_for('static', filename='uploads/' + item.image) }}" 
+                                 class="card-img-top" alt="{{ item.name }}">
+                        {% else %}
+                            <img src="https://images.unsplash.com/photo-1580618672591-eb180b1a973f?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80" 
+                                 class="card-img-top" alt="No image">
+                        {% endif %}
+                        <div class="card-body">
+                            <h5 class="card-title">{{ item.name }}</h5>
+                            <p class="card-text text-truncate">{{ item.description }}</p>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <small class="text-muted">
+                                    <i class="fas fa-map-marker-alt me-1"></i>
+                                    {{ item.location }}
+                                </small>
+                                <span class="badge bg-success">Ditemukan</span>
+                            </div>
+                        </div>
+                        <div class="card-footer bg-transparent">
+                            <a href="{{ url_for('item_detail', item_id=item.id) }}" 
+                               class="btn btn-outline-primary btn-sm w-100">
+                                <i class="fas fa-info-circle me-1"></i> Detail
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="alert alert-info">
+                <i class="fas fa-info-circle me-2"></i> Belum ada laporan barang ditemukan.
+            </div>
+        {% endif %}
+        
+        <div class="text-center mt-3">
+            <a href="{{ url_for('list_items', type='found') }}" class="btn btn-success">
+                Lihat Semua Barang Ditemukan <i class="fas fa-arrow-right ms-2"></i>
+            </a>
+        </div>
+    </div>
+</div>
+
+<!-- How it Works Section -->
+<section class="bg-light py-5 rounded my-5">
+    <div class="container">
+        <h2 class="text-center mb-5 section-title">Cara Kerja Sistem</h2>
+        <div class="row text-center">
+            <div class="col-md-4 mb-4">
+                <div class="p-4">
+                    <div class="rounded-circle bg-primary text-white d-inline-flex align-items-center justify-content-center mb-3" 
+                         style="width: 80px; height: 80px;">
+                        <i class="fas fa-exclamation-triangle fa-2x"></i>
+                    </div>
+                    <h4>Laporkan</h4>
+                    <p>Laporkan barang hilang atau ditemukan dengan mengisi formulir dan upload foto.</p>
+                </div>
+            </div>
+            <div class="col-md-4 mb-4">
+                <div class="p-4">
+                    <div class="rounded-circle bg-success text-white d-inline-flex align-items-center justify-content-center mb-3" 
+                         style="width: 80px; height: 80px;">
+                        <i class="fas fa-search fa-2x"></i>
+                    </div>
+                    <h4>Cari</h4>
+                    <p>Cari barang berdasarkan kategori, lokasi, atau kata kunci dengan filter yang mudah.</p>
+                </div>
+            </div>
+            <div class="col-md-4 mb-4">
+                <div class="p-4">
+                    <div class="rounded-circle bg-warning text-white d-inline-flex align-items-center justify-content-center mb-3" 
+                         style="width: 80px; height: 80px;">
+                        <i class="fas fa-comments fa-2x"></i>
+                    </div>
+                    <h4>Hubungi</h4>
+                    <p>Hubungi pemilik atau penemu barang melalui WhatsApp dengan satu klik.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Stats Section -->
+<section class="my-5">
+    <div class="container">
+        <div class="row text-center">
+            <div class="col-md-3 col-6 mb-4">
+                <div class="p-3 border rounded bg-white shadow-sm">
+                    <h3 class="text-primary">{{ lost_items|length }}</h3>
+                    <p class="mb-0">Barang Hilang</p>
+                </div>
+            </div>
+            <div class="col-md-3 col-6 mb-4">
+                <div class="p-3 border rounded bg-white shadow-sm">
+                    <h3 class="text-success">{{ found_items|length }}</h3>
+                    <p class="mb-0">Barang Ditemukan</p>
+                </div>
+            </div>
+            <div class="col-md-3 col-6 mb-4">
+                <div class="p-3 border rounded bg-white shadow-sm">
+                    <h3 class="text-info">{{ lost_items|length + found_items|length }}</h3>
+                    <p class="mb-0">Total Laporan</p>
+                </div>
+            </div>
+            <div class="col-md-3 col-6 mb-4">
+                <div class="p-3 border rounded bg-white shadow-sm">
+                    <h3 class="text-warning">24/7</h3>
+                    <p class="mb-0">Akses Online</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

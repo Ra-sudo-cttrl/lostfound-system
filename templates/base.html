@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Lost & Found System - Universitas{% endblock %}</title>
+    
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+    <!-- Navigation Bar -->
+    <nav class="navbar navbar-expand-lg navbar-dark sticky-top">
+        <div class="container">
+            <!-- LOGO DI KIRI TEKS LOST & FOUND -->
+            <a class="navbar-brand d-flex align-items-center" href="{{ url_for('index') }}">
+                <!-- LOGO KAMPUS -->
+                <img src="{{ url_for('static', filename='images/logo.png') }}" 
+                     alt="Logo Kampus" 
+                     style="height: 40px; width: auto; margin-right: 12px; border-radius: 5px;">
+                
+                <!-- TEKS LOST & FOUND -->
+                <div>
+                    <div class="fw-bold" style="font-size: 1.25rem;">Lost & Found System</div>
+                    <div class="small" style="font-size: 0.8rem;">Campus System</div>
+                </div>
+            </a>
+            
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('index') }}">
+                            <i class="fas fa-home me-1"></i> Beranda
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('list_items', type='lost') }}">
+                            <i class="fas fa-search me-1"></i> Barang Hilang
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('list_items', type='found') }}">
+                            <i class="fas fa-hand-holding-heart me-1"></i> Barang Ditemukan
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('add_item') }}">
+                            <i class="fas fa-plus-circle me-1"></i> Laporkan
+                        </a>
+                    </li>
+                    
+                    {% if session.get('user_id') %}
+                        {% if session.get('is_admin') %}
+                            <li class="nav-item">
+                                <span class="nav-link text-warning">
+                                    <i class="fas fa-user-shield me-1"></i> Admin
+                                </span>
+                            </li>
+                        {% endif %}
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ url_for('logout') }}">
+                                <i class="fas fa-sign-out-alt me-1"></i> Logout ({{ session.username }})
+                            </a>
+                        </li>
+                    {% else %}
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ url_for('login') }}">
+                                <i class="fas fa-sign-in-alt me-1"></i> Login
+                            </a>
+                        </li>
+                    {% endif %}
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Flash Messages -->
+    <div class="container mt-3">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+    </div>
+
+    <!-- Main Content -->
+    <main class="container my-4">
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-4">
+                    <h5>Lost & Found System</h5>
+                    <p>Sistem pendataan barang hilang dan ditemukan di lingkungan kampus.</p>
+                    <p>Membantu mahasiswa menemukan barang yang hilang dengan lebih mudah.</p>
+                </div>
+                <div class="col-md-4">
+                    <h5>Quick Links</h5>
+                    <ul class="list-unstyled">
+                        <li><a href="{{ url_for('index') }}"><i class="fas fa-chevron-right me-2"></i> Beranda</a></li>
+                        <li><a href="{{ url_for('list_items', type='lost') }}"><i class="fas fa-chevron-right me-2"></i> Barang Hilang</a></li>
+                        <li><a href="{{ url_for('list_items', type='found') }}"><i class="fas fa-chevron-right me-2"></i> Barang Ditemukan</a></li>
+                        <li><a href="{{ url_for('add_item') }}"><i class="fas fa-chevron-right me-2"></i> Laporkan Barang</a></li>
+                    </ul>
+                </div>
+                <div class="col-md-4">
+                    <h5>Kontak</h5>
+                    <p><i class="fas fa-map-marker-alt me-2"></i> Fakultas Sains dan Teknologi, Universitas Pattimura</p>
+                    <p><i class="fas fa-phone me-2"></i> +62911 322626, 322627, 322628</p>
+                    <p><i class="fas fa-envelope me-2"></i> humas@unpatti.ac.id</p>
+                </div>
+            </div>
+            <hr class="my-4" style="border-color: rgba(255,255,255,0.1);">
+            <div class="text-center">
+                <p>&copy; 2025 Lost & Found System - Universitas Pattimura | Hottumese. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Bootstrap 5 JS Bundle -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    {% block extra_js %}{% endblock %}
+</body>
+</html>
