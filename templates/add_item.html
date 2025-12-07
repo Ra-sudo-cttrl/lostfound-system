@@ -13,7 +13,7 @@
                 <p class="text-muted">Isi formulir berikut untuk melaporkan barang hilang atau ditemukan</p>
             </div>
             
-            <form method="POST" action="{{ url_for('add_item') }}" enctype="multipart/form-data">
+            <form method="POST" action="{{ url_for('add_item') }}" enctype="multipart/form-data" id="reportForm">
                 {{ form.hidden_tag() }}
                 
                 <div class="row">
@@ -69,7 +69,10 @@
                         {{ form.location(class="form-select", id="location-select") }}
                         <div class="mt-2">
                             <input type="text" class="form-control" id="location-custom" 
-                                   placeholder="Atau ketik lokasi lainnya..." style="display: none;">
+                                   name="location_custom"
+                                   placeholder="Ketik lokasi di sini..." 
+                                   style="display: none;"
+                                   data-required="false">
                         </div>
                         {% if form.location.errors %}
                             <div class="text-danger small">
@@ -78,6 +81,9 @@
                                 {% endfor %}
                             </div>
                         {% endif %}
+                        <small class="text-muted" id="location-hint" style="display: none;">
+                            Isi lokasi spesifik di sini
+                        </small>
                     </div>
                     
                     <div class="col-md-6 mb-3">
@@ -112,7 +118,7 @@
                 </div>
                 
                 <div class="d-grid gap-2">
-                    <button type="submit" class="btn btn-primary btn-lg">
+                    <button type="submit" class="btn btn-primary btn-lg" id="submitBtn">
                         <i class="fas fa-paper-plane me-2"></i> Kirim Laporan
                     </button>
                     <a href="{{ url_for('index') }}" class="btn btn-outline-secondary">
@@ -130,44 +136,77 @@
 document.addEventListener('DOMContentLoaded', function() {
     const locationSelect = document.getElementById('location-select');
     const locationCustom = document.getElementById('location-custom');
+    const locationHint = document.getElementById('location-hint');
+    const submitBtn = document.getElementById('submitBtn');
+    const reportForm = document.getElementById('reportForm');
     
-    // Tampilkan input teks jika "Lainnya" dipilih
-    locationSelect.addEventListener('change', function() {
-        if (this.value === 'lainnya') {
+    // Fungsi untuk mengatur tampilan input custom
+    function toggleCustomLocation() {
+        if (locationSelect.value === 'lainnya') {
             locationCustom.style.display = 'block';
-            locationCustom.required = true;
-            // Ubah value select menjadi kosong untuk memaksa input custom
-            this.value = '';
+            locationCustom.setAttribute('data-required', 'true');
+            locationHint.style.display = 'block';
+            
+            // Fokus ke input custom setelah ditampilkan
+            setTimeout(() => {
+                locationCustom.focus();
+            }, 100);
         } else {
             locationCustom.style.display = 'none';
-            locationCustom.required = false;
-            // Isi value custom dengan value dari select
+            locationCustom.setAttribute('data-required', 'false');
+            locationHint.style.display = 'none';
             locationCustom.value = '';
         }
-    });
+    }
     
-    // Jika form disubmit, set value location
-    document.querySelector('form').addEventListener('submit', function(e) {
-        if (locationCustom.style.display === 'block' && locationCustom.value.trim() !== '') {
-            // Jika input custom diisi, gunakan nilai dari input custom
-            // Kita perlu set value ke hidden field atau ubah select value
-            // Buat hidden input untuk menyimpan location
+    // Event listener untuk perubahan dropdown
+    locationSelect.addEventListener('change', toggleCustomLocation);
+    
+    // Validasi form sebelum submit
+    reportForm.addEventListener('submit', function(e) {
+        const locationValue = locationSelect.value;
+        const customLocationValue = locationCustom.value.trim();
+        
+        // Validasi untuk lokasi "lainnya"
+        if (locationValue === 'lainnya') {
+            if (!customLocationValue) {
+                e.preventDefault(); // Hentikan submit
+                alert('⚠️ Harap isi lokasi jika memilih "Lainnya (ketik sendiri)"');
+                locationCustom.focus();
+                locationCustom.style.borderColor = '#dc3545';
+                return false;
+            }
+            
+            // Set value ke hidden field jika diperlukan
             const hiddenInput = document.createElement('input');
             hiddenInput.type = 'hidden';
-            hiddenInput.name = 'location';
-            hiddenInput.value = locationCustom.value;
+            hiddenInput.name = 'location_custom_value';
+            hiddenInput.value = customLocationValue;
             this.appendChild(hiddenInput);
-            
-            // Nonaktifkan select asli
-            locationSelect.disabled = true;
         }
+        
+        // Validasi untuk lokasi kosong
+        if (!locationValue && locationValue !== 'lainnya') {
+            e.preventDefault();
+            alert('⚠️ Harap pilih lokasi dari daftar atau pilih "Lainnya" untuk mengetik sendiri');
+            locationSelect.focus();
+            return false;
+        }
+        
+        // Jika semua validasi lolos, ubah tombol ke loading state
+        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i> Mengirim...';
+        submitBtn.disabled = true;
+        
+        return true;
     });
     
-    // Cek saat page load jika "lainnya" sudah dipilih sebelumnya
-    if (locationSelect.value === 'lainnya') {
-        locationCustom.style.display = 'block';
-        locationCustom.required = true;
-    }
+    // Reset border color saat user mulai mengetik di input custom
+    locationCustom.addEventListener('input', function() {
+        this.style.borderColor = '#e0e0e0';
+    });
+    
+    // Cek status awal saat page load
+    toggleCustomLocation();
 });
 </script>
 {% endblock %}

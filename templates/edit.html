@@ -1,0 +1,284 @@
+{% extends "base.html" %}
+
+{% block title %}Edit Barang - Lost & Found System{% endblock %}
+
+{% block content %}
+<!-- DEBUG: Tampilkan Flash Messages -->
+{% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+        <div class="container mb-4">
+            {% for category, message in messages %}
+                <div class="alert alert-{{ category if category != 'message' else 'info' }} alert-dismissible fade show">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+{% endwith %}
+
+<!-- DEBUG: Tampilkan Form Errors -->
+{% if form.errors %}
+    <div class="alert alert-danger">
+        <strong>Error dalam form:</strong>
+        <ul>
+        {% for field, errors in form.errors.items() %}
+            <li>{{ field }}: {{ errors|join(', ') }}</li>
+        {% endfor %}
+        </ul>
+    </div>
+{% endif %}
+
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <div class="form-container fade-in">
+            <div class="text-center mb-4">
+                <h2 class="section-title">
+                    <i class="fas fa-edit me-2"></i> Edit Barang
+                </h2>
+                <p class="text-muted">Ubah informasi barang yang telah dilaporkan</p>
+            </div>
+            
+            <form method="POST" action="{{ url_for('edit_item', item_id=item.id) }}" enctype="multipart/form-data" id="editForm">
+                {{ form.hidden_tag() }}
+                
+                <!-- TAMBAH: Hidden field untuk location custom -->
+                <input type="hidden" id="location_final" name="location_final" value="">
+                
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label for="type" class="form-label">Jenis Laporan</label>
+                        {{ form.type(class="form-select") }}
+                        {% if form.type.errors %}
+                            <div class="text-danger small">
+                                {% for error in form.type.errors %}
+                                    {{ error }}
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="col-md-6 mb-3">
+                        <label for="name" class="form-label">Nama Barang</label>
+                        {{ form.name(class="form-control", required="required") }}
+                        {% if form.name.errors %}
+                            <div class="text-danger small">
+                                {% for error in form.name.errors %}
+                                    {{ error }}
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <div class="mb-3">
+                    <label for="description" class="form-label">Deskripsi Detail</label>
+                    {{ form.description(class="form-control", rows="5") }}
+                </div>
+                
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label for="location" class="form-label">Lokasi</label>
+                        {{ form.location(class="form-select", id="location-select", required="required") }}
+                        <div class="mt-2">
+                            <input type="text" class="form-control" id="location-custom" 
+                                   name="location_custom"
+                                   value="{{ item.location if item.location not in ['Gedung A - Fakultas Teknik', 'Gedung B - Fakultas Ekonomi', 'Gedung C - Fakultas Hukum', 'Perpustakaan Pusat', 'Kantin Utama', 'Lab Komputer', 'Auditorium', 'Lapangan Olahraga', 'Area Parkir', 'lainnya'] else '' }}"
+                                   placeholder="Ketik lokasi di sini..." 
+                                   style="display: none;"
+                                   data-required="false">
+                        </div>
+                        {% if form.location.errors %}
+                            <div class="text-danger small">
+                                {% for error in form.location.errors %}
+                                    {{ error }}
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                        <small class="text-muted" id="location-hint" style="display: none;">
+                            Isi lokasi spesifik di sini
+                        </small>
+                    </div>
+                    
+                    <div class="col-md-6 mb-3">
+                        <label for="contact" class="form-label">Nomor WhatsApp</label>
+                        {{ form.contact(class="form-control", required="required") }}
+                    </div>
+                </div>
+                
+                {% if item.image %}
+                <div class="mb-3">
+                    <label class="form-label">Gambar Saat Ini</label>
+                    <div>
+                        <img src="{{ url_for('static', filename='uploads/' + item.image) }}" 
+                             class="img-thumbnail" style="max-height: 200px;">
+                    </div>
+                    <small class="text-muted">Gambar saat ini akan diganti jika Anda upload gambar baru.</small>
+                </div>
+                {% endif %}
+                
+                <div class="mb-4">
+                    <label for="image" class="form-label">
+                        {% if item.image %}Ganti Gambar{% else %}Upload Gambar{% endif %}
+                    </label>
+                    {{ form.image(class="form-control") }}
+                    <small class="text-muted">Kosongkan jika tidak ingin mengganti gambar. Format: JPG, PNG, GIF (max 5MB)</small>
+                </div>
+                
+                <div class="d-grid gap-2">
+                    <button type="submit" class="btn btn-warning btn-lg" id="submitBtn">
+                        <i class="fas fa-save me-2"></i> Simpan Perubahan
+                    </button>
+                    <a href="{{ url_for('item_detail', item_id=item.id) }}" 
+                       class="btn btn-outline-secondary">
+                        <i class="fas fa-times me-2"></i> Batal
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const locationSelect = document.getElementById('location-select');
+    const locationCustom = document.getElementById('location-custom');
+    const locationHint = document.getElementById('location-hint');
+    const submitBtn = document.getElementById('submitBtn');
+    const editForm = document.getElementById('editForm');
+    const locationFinal = document.getElementById('location_final');
+    
+    // Fungsi toggle custom location
+    function toggleCustomLocation() {
+        if (locationSelect.value === 'lainnya') {
+            locationCustom.style.display = 'block';
+            locationHint.style.display = 'block';
+            
+            if (!locationCustom.value.trim()) {
+                setTimeout(() => { locationCustom.focus(); }, 100);
+            }
+        } else {
+            locationCustom.style.display = 'none';
+            locationHint.style.display = 'none';
+        }
+    }
+    
+    locationSelect.addEventListener('change', toggleCustomLocation);
+    
+    // Validasi form
+    editForm.addEventListener('submit', function(e) {
+        console.log('Form submit dimulai...');
+        
+        let isValid = true;
+        let errorMessage = '';
+        
+        // 1. Validasi Nama
+        const nameField = document.querySelector('input[name="name"]');
+        if (!nameField.value.trim()) {
+            errorMessage = '⚠️ Nama barang harus diisi';
+            nameField.focus();
+            nameField.style.borderColor = '#dc3545';
+            isValid = false;
+        }
+        
+        // 2. Validasi Lokasi
+        if (isValid) {
+            if (locationSelect.value === 'lainnya') {
+                const customVal = locationCustom.value.trim();
+                if (!customVal) {
+                    errorMessage = '⚠️ Harap isi lokasi spesifik';
+                    locationCustom.focus();
+                    locationCustom.style.borderColor = '#dc3545';
+                    isValid = false;
+                } else {
+                    // Simpan ke hidden field
+                    locationFinal.value = customVal;
+                }
+            } else if (!locationSelect.value) {
+                errorMessage = '⚠️ Harap pilih lokasi';
+                locationSelect.focus();
+                locationSelect.style.borderColor = '#dc3545';
+                isValid = false;
+            } else {
+                locationFinal.value = locationSelect.value;
+            }
+        }
+        
+        // 3. Validasi WhatsApp
+        if (isValid) {
+            const contactField = document.querySelector('input[name="contact"]');
+            const contactVal = contactField.value.trim();
+            if (!contactVal) {
+                errorMessage = '⚠️ Nomor WhatsApp harus diisi';
+                contactField.focus();
+                contactField.style.borderColor = '#dc3545';
+                isValid = false;
+            } else if (!/^[0-9]{10,15}$/.test(contactVal)) {
+                errorMessage = '⚠️ Nomor WhatsApp harus 10-15 digit angka';
+                contactField.focus();
+                contactField.style.borderColor = '#dc3545';
+                isValid = false;
+            }
+        }
+        
+        // 4. Validasi Gambar
+        if (isValid) {
+            const imageField = document.querySelector('input[name="image"]');
+            if (imageField.files.length > 0) {
+                const file = imageField.files[0];
+                const validTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/jpg'];
+                const maxSize = 5 * 1024 * 1024; // 5MB
+                
+                if (!validTypes.includes(file.type)) {
+                    errorMessage = '⚠️ Format file harus JPG, PNG, atau GIF';
+                    isValid = false;
+                } else if (file.size > maxSize) {
+                    errorMessage = '⚠️ Ukuran file maksimal 5MB';
+                    isValid = false;
+                }
+            }
+        }
+        
+        // Jika error, tampilkan dan hentikan
+        if (!isValid) {
+            e.preventDefault();
+            alert(errorMessage);
+            return false;
+        }
+        
+        // Loading state
+        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i> Menyimpan...';
+        submitBtn.disabled = true;
+        
+        // Debug: log form data
+        const formData = new FormData(editForm);
+        for (let [key, value] of formData.entries()) {
+            console.log(key + ':', value);
+        }
+        
+        return true;
+    });
+    
+    // Reset border color
+    locationCustom.addEventListener('input', function() {
+        this.style.borderColor = '#ced4da';
+    });
+    
+    // Inisialisasi
+    const currentLocation = '{{ item.location }}';
+    const predefinedLocations = [
+        'Gedung A - Fakultas Teknik', 'Gedung B - Fakultas Ekonomi', 
+        'Gedung C - Fakultas Hukum', 'Perpustakaan Pusat', 'Kantin Utama',
+        'Lab Komputer', 'Auditorium', 'Lapangan Olahraga', 'Area Parkir'
+    ];
+    
+    if (currentLocation && !predefinedLocations.includes(currentLocation)) {
+        locationSelect.value = 'lainnya';
+    }
+    
+    toggleCustomLocation();
+});
+</script>
+{% endblock %}

@@ -33,5 +33,11 @@ instance/
 .DS_Store
 Thumbs.db
 
-# Static files (optional jika mau include)
-# static/uploads/
+# Vercel (tambahan ini)
+.vercel/
+
+# File/folder khusus untuk di-exclude dari upload ke Vercel
+lostfound.db           ← Database lokal, JANGAN diupload
+OUTLINE                ← File tidak jelas
+TIMELINE               ← File tidak jelas
+gunicorn_config.py     ← Tidak perlu untuk Vercel

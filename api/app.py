@@ -1,5 +1,6 @@
 import os
-import time  # ← TAMBAHKAN INI
+import sys
+import time
 from datetime import datetime
 import secrets
 from flask import Flask, render_template, redirect, url_for, flash, request, abort, session
@@ -11,22 +12,21 @@ from wtforms.validators import DataRequired, Length, Regexp
 from werkzeug.security import generate_password_hash, check_password_hash
 from werkzeug.utils import secure_filename
 
-# Cek apakah PIL/Pillow tersedia
-try:
-    from PIL import Image
-    HAS_PIL = True
-except ImportError:
-    HAS_PIL = False
-    print("Peringatan: Pillow tidak terinstall. Gambar akan disimpan tanpa resize.")
+# ===================== PATH FIX UNTUK VERCEL =====================
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+TEMPLATES_DIR = os.path.join(BASE_DIR, 'templates')
+STATIC_DIR = os.path.join(BASE_DIR, 'static')
 
 # ===================== KONFIGURASI APLIKASI =====================
-app = Flask(__name__)
+app = Flask(__name__,
+            template_folder=TEMPLATES_DIR,
+            static_folder=STATIC_DIR)
 
 # Konfigurasi
 app.config['SECRET_KEY'] = 'dev-secret-key-ubah-di-production'
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///lostfound.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-app.config['UPLOAD_FOLDER'] = 'static/uploads'
+app.config['UPLOAD_FOLDER'] = os.path.join(STATIC_DIR, 'uploads')
 app.config['MAX_CONTENT_LENGTH'] = 2 * 1024 * 1024  # 2MB max file size
 app.config['ALLOWED_EXTENSIONS'] = {'jpg', 'jpeg', 'png'}
 
@@ -108,7 +108,7 @@ def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in app.config['ALLOWED_EXTENSIONS']
 
 def save_image(file):
-    """Simpan gambar dengan nama random dan resize jika PIL tersedia"""
+    """Simpan gambar dengan nama random"""
     if not file or file.filename == '':
         return None
     
@@ -120,49 +120,22 @@ def save_image(file):
         filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
         
         try:
-            # Simpan file terlebih dahulu
             file.save(filepath)
-            
-            # Resize jika PIL tersedia
-            if HAS_PIL:
-                try:
-                    output_size = (800, 800)
-                    img = Image.open(filepath)
-                    img.thumbnail(output_size)
-                    img.save(filepath)
-                except Exception as e:
-                    print(f"Gagal resize gambar: {e}")
-                    # Lanjutkan dengan gambar asli
-            else:
-                # Jika PIL tidak tersedia, simpan saja tanpa resize
-                pass
-                
+            return filename
         except Exception as e:
             print(f"Error menyimpan gambar: {e}")
             return None
-        
-        return filename
     return None
 
 def get_location_value(form_location, request_form):
     """Ambil nilai lokasi dari form (bisa dari select atau input custom)"""
-    # Debug: print request form untuk melihat data yang diterima
-    # print(f"DEBUG: Form location value from select: {form_location}")
-    # print(f"DEBUG: Request form keys: {list(request_form.keys())}")
-    
     if form_location == 'lainnya':
-        # Cek apakah ada input custom dari request
         custom_location = request_form.get('location_custom', '').strip()
-        # print(f"DEBUG: Custom location received: '{custom_location}'")
-        
         if custom_location:
-            # Gunakan nilai custom jika ada
             return custom_location
         else:
-            # Jika pilih "lainnya" tapi tidak isi custom, kembalikan string kosong
             return ''
     else:
-        # Gunakan nilai dari select (bukan value internal, tapi label)
         location_map = {
             'gedung_a': 'Gedung A - Fakultas Teknik',
             'gedung_b': 'Gedung B - Fakultas Ekonomi',
@@ -180,7 +153,6 @@ def get_location_value(form_location, request_form):
 @app.route('/')
 def index():
     """Halaman utama"""
-    # Ambil 6 item terbaru dari masing-masing tipe
     lost_items = Item.query.filter_by(type='lost').order_by(Item.timestamp.desc()).limit(3).all()
     found_items = Item.query.filter_by(type='found').order_by(Item.timestamp.desc()).limit(3).all()
     
@@ -197,11 +169,9 @@ def login():
         user = User.query.filter_by(username=form.username.data).first()
         
         if user and user.check_password(form.password.data):
-            # Simpan user di session
             session['user_id'] = user.id
             session['username'] = user.username
             session['is_admin'] = user.is_admin
-            
             flash('Login berhasil!', 'success')
             return redirect(url_for('index'))
         else:
@@ -219,7 +189,6 @@ def logout():
 @app.route('/add', methods=['GET', 'POST'])
 def add_item():
     """Tambah item baru"""
-    # Cek apakah user sudah login
     if 'user_id' not in session:
         flash('Harap login terlebih dahulu.', 'warning')
         return redirect(url_for('login'))
@@ -227,15 +196,12 @@ def add_item():
     form = ItemForm()
     
     if form.validate_on_submit():
-        # Simpan gambar jika ada
         image_filename = None
         if form.image.data:
             image_filename = save_image(form.image.data)
         
-        # Ambil nilai lokasi (bisa dari select atau input custom)
         location_value = get_location_value(form.location.data, request.form)
         
-        # Validasi khusus untuk lokasi "lainnya"
         if form.location.data == 'lainnya':
             custom_location = request.form.get('location_custom', '').strip()
             if not custom_location:
@@ -243,12 +209,10 @@ def add_item():
                 return render_template('add_item.html', form=form)
             location_value = custom_location
         
-        # Validasi lokasi tidak boleh kosong
         if not location_value or location_value == '':
             flash('Harap pilih atau isi lokasi.', 'danger')
             return render_template('add_item.html', form=form)
         
-        # Buat item baru
         new_item = Item(
             type=form.type.data,
             name=form.type.data.capitalize() + ': ' + form.name.data,
@@ -273,26 +237,20 @@ def list_items(type):
     if type not in ['lost', 'found']:
         abort(404)
     
-    # Ambil parameter filter
     page = request.args.get('page', 1, type=int)
     search = request.args.get('search', '')
     location_filter = request.args.get('location', '')
     
-    # Query dasar
     query = Item.query.filter_by(type=type)
     
-    # Apply search filter
     if search:
         query = query.filter(Item.name.contains(search) | Item.description.contains(search))
     
-    # Apply location filter
     if location_filter:
         query = query.filter_by(location=location_filter)
     
-    # Pagination
     items = query.order_by(Item.timestamp.desc()).paginate(page=page, per_page=6, error_out=False)
     
-    # Ambil semua lokasi unik untuk dropdown filter
     locations = db.session.query(Item.location).distinct().all()
     location_choices = [loc[0] for loc in locations]
     
@@ -314,12 +272,10 @@ def item_detail(item_id):
 @app.route('/edit/<int:item_id>', methods=['GET', 'POST'])
 def edit_item(item_id):
     """Edit item yang sudah ada"""
-    # Cek apakah user sudah login
     if 'user_id' not in session:
         flash('Harap login terlebih dahulu.', 'warning')
         return redirect(url_for('login'))
     
-    # Cek apakah user adalah pemilik item atau admin
     item = Item.query.get_or_404(item_id)
     if item.user_id != session['user_id'] and not session.get('is_admin'):
         abort(403)
@@ -328,20 +284,16 @@ def edit_item(item_id):
     
     if form.validate_on_submit():
         try:
-            # Simpan gambar jika ada
-            image_filename = item.image  # Pertahankan gambar lama default
+            image_filename = item.image
             if form.image.data:
                 image_filename = save_image(form.image.data)
-                # Hapus gambar lama jika ada gambar baru
                 if item.image and item.image != image_filename:
                     old_image_path = os.path.join(app.config['UPLOAD_FOLDER'], item.image)
                     if os.path.exists(old_image_path):
                         os.remove(old_image_path)
             
-            # Ambil nilai lokasi (bisa dari select atau input custom)
             location_value = get_location_value(form.location.data, request.form)
             
-            # Validasi khusus untuk lokasi "lainnya"
             if form.location.data == 'lainnya':
                 custom_location = request.form.get('location_custom', '').strip()
                 if not custom_location:
@@ -349,12 +301,10 @@ def edit_item(item_id):
                     return render_template('edit.html', form=form, item=item)
                 location_value = custom_location
             
-            # Validasi lokasi tidak boleh kosong
             if not location_value or location_value == '':
                 flash('Harap pilih atau isi lokasi.', 'danger')
                 return render_template('edit.html', form=form, item=item)
             
-            # Update item
             item.type = form.type.data
             item.name = form.type.data.capitalize() + ': ' + form.name.data
             item.description = form.description.data
@@ -370,20 +320,17 @@ def edit_item(item_id):
         except Exception as e:
             db.session.rollback()
             flash(f'❌ Error: {str(e)}', 'danger')
-            app.logger.error(f'Edit error: {str(e)}')
     
     return render_template('edit.html', form=form, item=item)
 
 @app.route('/delete/<int:item_id>', methods=['POST'])
 def delete_item(item_id):
     """Hapus item (admin only)"""
-    # Cek apakah admin
     if not session.get('is_admin'):
         abort(403)
     
     item = Item.query.get_or_404(item_id)
     
-    # Hapus gambar jika ada
     if item.image:
         image_path = os.path.join(app.config['UPLOAD_FOLDER'], item.image)
         if os.path.exists(image_path):
@@ -395,7 +342,6 @@ def delete_item(item_id):
     flash('Item berhasil dihapus!', 'success')
     return redirect(url_for('list_items', type=item.type))
 
-# ===================== ERROR HANDLERS =====================
 @app.errorhandler(404)
 def not_found_error(error):
     return render_template('404.html'), 404
@@ -410,19 +356,20 @@ def create_tables():
     with app.app_context():
         db.create_all()
         
-        # Buat admin default jika belum ada
         if not User.query.filter_by(username='admin').first():
             admin = User(username='admin', is_admin=True)
             admin.set_password('admin123')
             db.session.add(admin)
         
-        # Buat user mahasiswa contoh
         if not User.query.filter_by(username='mahasiswa').first():
             student = User(username='mahasiswa', is_admin=False)
             student.set_password('student123')
             db.session.add(student)
         
         db.session.commit()
+
+# ===================== VERCEL SPECIFIC =====================
+create_tables()
 
 if __name__ == '__main__':
     create_tables()
